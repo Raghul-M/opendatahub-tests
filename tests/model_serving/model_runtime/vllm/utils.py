@@ -11,7 +11,7 @@ from ocp_resources.inference_service import InferenceService
 from ocp_resources.secret import Secret
 from tenacity import retry, stop_after_attempt, wait_exponential
 
-from tests.model_serving.model_runtime.utils import validate_text_inference_fuzzy
+from tests.model_serving.model_runtime.utils import validate_inference_output, validate_text_inference_fuzzy
 from tests.model_serving.model_runtime.vllm.constant import (
     CHAT_QUERY,
     COMPLETION_QUERY,
@@ -128,11 +128,6 @@ def run_raw_inference(
 def validate_supported_quantization_schema(q_type: str) -> None:
     if q_type not in VLLM_SUPPORTED_QUANTIZATION:
         raise ValueError(f"Unsupported quantization type: {q_type}")
-
-
-def validate_inference_output(*args: tuple[str, ...] | list[Any], response_snapshot: Any) -> None:
-    for data in args:
-        assert data == response_snapshot, f"output mismatch for {data}"
 
 
 def validate_raw_openai_inference_request(

@@ -1,45 +1,4 @@
-from typing import Any, TypedDict
-
-from utilities.constants import AcceleratorType, KServeDeploymentType, Labels, RuntimeTemplates
-
-# Configurations
-ACCELERATOR_IDENTIFIER: dict[str, str] = {
-    AcceleratorType.NVIDIA: Labels.Nvidia.NVIDIA_COM_GPU,
-    AcceleratorType.AMD: "amd.com/gpu",
-    AcceleratorType.GAUDI: "habana.ai/gaudi",
-    AcceleratorType.SPYRE: Labels.Spyre.SPYRE_COM_GPU,
-    AcceleratorType.CPU_x86: Labels.CPU.CPU_x86,
-}
-
-TEMPLATE_MAP: dict[str, str] = {
-    AcceleratorType.NVIDIA: RuntimeTemplates.VLLM_CUDA,
-    AcceleratorType.AMD: RuntimeTemplates.VLLM_ROCM,
-    AcceleratorType.GAUDI: RuntimeTemplates.VLLM_GAUDI,
-    AcceleratorType.SPYRE: RuntimeTemplates.VLLM_SPYRE,
-    AcceleratorType.CPU_x86: RuntimeTemplates.VLLM_CPU_x86,
-}
-
-
-PREDICT_RESOURCES: dict[str, list[dict[str, str | dict[str, str]]] | dict[str, dict[str, str]]] = {
-    "volumes": [
-        {"name": "shared-memory", "emptyDir": {"medium": "Memory", "sizeLimit": "16Gi"}},
-        {"name": "tmp", "emptyDir": {}},
-        {"name": "home", "emptyDir": {}},
-    ],
-    "volume_mounts": [
-        {"name": "shared-memory", "mountPath": "/dev/shm"},
-        {"name": "tmp", "mountPath": "/tmp"},
-        {"name": "home", "mountPath": "/home/vllm"},
-    ],
-    "resources": {"requests": {"cpu": "2", "memory": "15Gi"}, "limits": {"cpu": "3", "memory": "16Gi"}},
-}
-
-BASE_RAW_DEPLOYMENT_CONFIG: dict[str, Any] = {
-    "deployment_mode": KServeDeploymentType.RAW_DEPLOYMENT,
-    "runtime_argument": None,
-    "min-replicas": 1,
-}
-
+from typing import Any
 
 COMPLETION_QUERY: list[dict[str, Any]] = [
     {
@@ -135,22 +94,6 @@ COMPLETION_QUERY: list[dict[str, Any]] = [
     },
 ]
 
-CHAT_QUERY: list[list[dict[str, str]]] = [
-    [{"role": "user", "content": "Write python code to find even number"}],
-    [
-        {
-            "role": "system",
-            "content": "Given a target sentence, construct the underlying meaning representation of the input "
-            "sentence as a single function with attributes and attribute values.",
-        },
-        {
-            "role": "user",
-            "content": "SpellForce 3 is a pretty bad game. The developer Grimlore Games is "
-            "clearly a bunch of no-talent hacks, and 2017 was a terrible year for games anyway.",
-        },
-    ],
-]
-
 EMBEDDING_QUERY: list[dict[str, str]] = [
     {
         "text": "What are the key benefits of renewable energy sources compared to fossil fuels?",
@@ -165,38 +108,16 @@ EMBEDDING_QUERY: list[dict[str, str]] = [
 ]
 
 PULL_SECRET_ACCESS_TYPE: str = '["Pull"]'
+PULL_SECRET_NAME: str = "oci-registry-pull-secret"  # pragma: allowlist secret
 
-
-class ModelcarRegistryConfig(TypedDict):
-    host: str
-    secret_name: str
-    env_var: str
-
-
-MODELCAR_REGISTRIES: dict[str, ModelcarRegistryConfig] = {
-    "redhat": {
-        "host": "registry.redhat.io",
-        "secret_name": "redhat-registry-pull-secret",  # pragma: allowlist secret
-        "env_var": "REDHAT_REGISTRY_PULL_SECRET",  # pragma: allowlist secret
-    },
-    "quay": {
-        "host": "quay.io",
-        "secret_name": "quay-oci-pull-secret",  # pragma: allowlist secret
-        "env_var": "QUAY_OCI_PULL_SECRET",  # pragma: allowlist secret
-    },
-    "stage": {
-        "host": "registry.stage.redhat.io",
-        "secret_name": "stage-registry-pull-secret",  # pragma: allowlist secret
-        "env_var": "STAGE_REGISTRY_PULL_SECRET",  # pragma: allowlist secret
-    },
-}
-
-REGISTRY_HOST_TO_KEY: dict[str, str] = {registry["host"]: key for key, registry in MODELCAR_REGISTRIES.items()}
+SUPPORTED_MODELCAR_REGISTRY_HOSTS: frozenset[str] = frozenset({
+    "registry.redhat.io",
+    "registry.stage.redhat.io",
+    "quay.io",
+})
 SPYRE_INFERENCE_SERVICE_PORT: int = 8000
-SPYRE_CONTAINER_PORT: int = 8000
 TIMEOUT_20MIN: int = 30 * 60
 OPENAI_ENDPOINT_NAME: str = "openai"
-TGIS_ENDPOINT_NAME: str = "tgis"
 AUDIO_FILE_URL: str = (
     "https://raw.githubusercontent.com/realpython/python-speech-recognition/master/audio_files/harvard.wav"
 )

@@ -3,11 +3,6 @@ import binascii
 import json
 import re
 
-from tests.model_serving.model_runtime.vllm.modelcar.constant import (
-    PULL_SECRET_ACCESS_TYPE,
-    REGISTRY_HOST_TO_KEY,
-)
-
 
 def normalize_registry_pull_auth(raw_value: str, expected_host: str | None = None) -> str:
     """Return base64 auth from a plain string or JSON registry credentials object.
@@ -99,20 +94,6 @@ def registry_host_from_oci_uri(storage_uri: str) -> str:
     if not storage_uri.startswith("oci://"):
         raise ValueError(f"Expected oci:// storage URI, got: {storage_uri}")
     return storage_uri.removeprefix("oci://").split("/", maxsplit=1)[0]
-
-
-def get_registry_key_for_host(host: str) -> str | None:
-    """Return the modelcar registry key for a known registry host."""
-    return REGISTRY_HOST_TO_KEY.get(host)
-
-
-def build_registry_pull_secret_string_data(host: str, auth: str) -> dict[str, str]:
-    """Build Kubernetes Secret string_data for a single-registry dockerconfigjson pull secret."""
-    return {
-        ".dockerconfigjson": json.dumps({"auths": {host: {"auth": auth}}}),
-        "ACCESS_TYPE": PULL_SECRET_ACCESS_TYPE,
-        "OCI_HOST": host,
-    }
 
 
 def safe_k8s_name(model_name: str, max_length: int = 20) -> str:
