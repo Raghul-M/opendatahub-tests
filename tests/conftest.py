@@ -1,5 +1,4 @@
 import base64
-import binascii
 import datetime
 import hashlib
 import hmac
@@ -161,33 +160,6 @@ def aws_secret_access_key(pytestconfig: Config) -> str:
             "Either pass with `--aws-secret-access-key` or set `AWS_SECRET_ACCESS_KEY` environment variable"
         )
     return secret_access_key
-
-
-@pytest.fixture(scope="session")
-def registry_pull_secret(pytestconfig: Config) -> list[str]:
-    registry_pull_secret = pytestconfig.option.registry_pull_secret
-    if not registry_pull_secret:
-        raise ValueError(
-            "Registry pull secret is not set. "
-            "Either pass with `--registry_pull_secret` or set `OCI_REGISTRY_PULL_SECRET` environment variable"
-        )
-    try:
-        for secret in registry_pull_secret:
-            base64.b64decode(s=secret, validate=True)
-        return registry_pull_secret
-    except binascii.Error:
-        raise ValueError("Registry pull secret is not a valid base64 encoded string")
-
-
-@pytest.fixture(scope="session")
-def registry_host(pytestconfig: pytest.Config) -> list[str]:
-    registry_host = pytestconfig.option.registry_host
-    if not registry_host:
-        raise ValueError(
-            "Registry host for OCI images is not set. "
-            "Either pass with `--registry_host` or set `REGISTRY_HOST` environment variable"
-        )
-    return registry_host
 
 
 @pytest.fixture(scope="session")

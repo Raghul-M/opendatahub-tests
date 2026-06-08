@@ -28,7 +28,7 @@ model_serving/
 │   ├── image_validation/              # Runtime image validation
 │   ├── mlserver/                      # MLServer runtime tests
 │   │   └── basic_model_deployment/    # LightGBM, ONNX, Sklearn, XGBoost
-│   ├── model_validation/             # Model validation tests
+│   ├── model_validation/             # Legacy; use vllm/modelcar (pending removal)
 │   ├── openvino/                      # OpenVINO Model Server (OVMS) tests
 │   │   ├── smoke/                     # Smoke test scripts
 │   │   ├── test_ovms_smoke.py
@@ -37,6 +37,8 @@ model_serving/
 │   ├── triton/                        # NVIDIA Triton runtime tests
 │   │   └── basic_model_deployment/    # PyTorch, ONNX, TF, Keras, Python, FIL, DALI
 │   └── vllm/                          # vLLM runtime tests (LLMs)
+│       ├── modelcar/                  # OCI modelcar YAML-driven validation
+│       ├── s3/                        # S3-hosted model raw deployment tests
 │       ├── basic_model_deployment/    # Granite, Llama, Merlinite models
 │       ├── multimodal/                # Vision models (Granite 3.1 2B)
 │       ├── quantization/              # AWQ quantization
