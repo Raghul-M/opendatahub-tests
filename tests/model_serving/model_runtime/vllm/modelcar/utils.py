@@ -79,23 +79,6 @@ def validate_registry_pull_auth(auth: str) -> None:
         raise ValueError("Registry pull secret is not a valid base64 encoded string") from exc
 
 
-def registry_host_from_oci_uri(storage_uri: str) -> str:
-    """Extract the registry host from an OCI modelcar storage URI.
-
-    Args:
-        storage_uri: OCI storage URI (e.g. oci://registry.redhat.io/rhelai1/model:1.5).
-
-    Returns:
-        Registry hostname.
-
-    Raises:
-        ValueError: If storage_uri is not a valid oci:// URI.
-    """
-    if not storage_uri.startswith("oci://"):
-        raise ValueError(f"Expected oci:// storage URI, got: {storage_uri}")
-    return storage_uri.removeprefix("oci://").split("/", maxsplit=1)[0]
-
-
 def safe_k8s_name(model_name: str, max_length: int = 20) -> str:
     """
     Create a safe Kubernetes name from model_name by truncating to max_length characters
