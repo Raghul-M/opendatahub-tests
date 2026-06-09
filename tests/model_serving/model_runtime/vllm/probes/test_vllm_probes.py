@@ -24,7 +24,7 @@ pytestmark = pytest.mark.usefixtures("skip_if_no_supported_accelerator_type", "v
 @pytest.mark.vllm_nvidia_single_gpu
 @pytest.mark.vllm_amd_gpu
 @pytest.mark.parametrize(
-    "model_namespace, s3_models_storage_uri, serving_runtime, vllm_inference_service",
+    "model_namespace, s3_models_storage_uri, probes_serving_runtime, vllm_probes_inference_service",
     [
         pytest.param(
             {"name": "granite-starter-probes"},
@@ -52,46 +52,50 @@ class TestVllmProbeHealth:
 
     def test_vllm_readiness_probe(
         self,
-        vllm_inference_service: InferenceService,
-        skip_if_not_raw_deployment: None,
-        vllm_pod_resource: Pod,
+        vllm_probes_inference_service: InferenceService,
+        skip_if_not_probes_raw_deployment: None,
+        vllm_probes_pod_resource: Pod,
     ) -> None:
         """Given a deployed vLLM Granite ISVC with probe-enabled runtime,
         When the predictor pod is inspected,
         Then the pod is Ready, readinessProbe defines httpGet, and the endpoint returns HTTP 200.
         """
-        assert pod_is_ready(pod=vllm_pod_resource), f"Pod {vllm_pod_resource.name} is not Ready"
+        assert pod_is_ready(pod=vllm_probes_pod_resource), f"Pod {vllm_probes_pod_resource.name} is not Ready"
 
-        readiness_probe = get_probe(pod=vllm_pod_resource, probe_type="readinessProbe")
+        readiness_probe = get_probe(pod=vllm_probes_pod_resource, probe_type="readinessProbe")
         http_get = readiness_probe.get("httpGet")
         assert http_get, "readinessProbe must define httpGet"
 
-        status_code = exec_vllm_health_check(pod=vllm_pod_resource, http_get=resolve_http_get(probe=readiness_probe))
+        status_code = exec_vllm_health_check(
+            pod=vllm_probes_pod_resource, http_get=resolve_http_get(probe=readiness_probe)
+        )
         assert status_code == "200", (
-            f"Readiness probe on {vllm_pod_resource.name} returned HTTP {status_code}, expected 200"
+            f"Readiness probe on {vllm_probes_pod_resource.name} returned HTTP {status_code}, expected 200"
         )
 
     def test_vllm_liveness_probe(
         self,
-        vllm_inference_service: InferenceService,
-        skip_if_not_raw_deployment: None,
-        vllm_pod_resource: Pod,
+        vllm_probes_inference_service: InferenceService,
+        skip_if_not_probes_raw_deployment: None,
+        vllm_probes_pod_resource: Pod,
     ) -> None:
         """Given a deployed vLLM Granite ISVC with probe-enabled runtime,
         When the predictor pod container status is checked,
         Then livenessProbe defines httpGet, no containers restarted, and the endpoint returns HTTP 200.
         """
-        restart_counts = get_restart_counts(pod=vllm_pod_resource)
+        restart_counts = get_restart_counts(pod=vllm_probes_pod_resource)
         restarted_containers = [name for name, count in restart_counts.items() if count > 0]
         assert not restarted_containers, (
             f"Containers {restarted_containers} restarted during startup; restart counts: {restart_counts}"
         )
 
-        liveness_probe = get_probe(pod=vllm_pod_resource, probe_type="livenessProbe")
+        liveness_probe = get_probe(pod=vllm_probes_pod_resource, probe_type="livenessProbe")
         http_get = liveness_probe.get("httpGet")
         assert http_get, "livenessProbe must define httpGet"
 
-        status_code = exec_vllm_health_check(pod=vllm_pod_resource, http_get=resolve_http_get(probe=liveness_probe))
+        status_code = exec_vllm_health_check(
+            pod=vllm_probes_pod_resource, http_get=resolve_http_get(probe=liveness_probe)
+        )
         assert status_code == "200", (
-            f"Liveness probe on {vllm_pod_resource.name} returned HTTP {status_code}, expected 200"
+            f"Liveness probe on {vllm_probes_pod_resource.name} returned HTTP {status_code}, expected 200"
         )
