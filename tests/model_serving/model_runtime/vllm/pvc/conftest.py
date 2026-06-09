@@ -1,4 +1,5 @@
 from collections.abc import Generator
+from copy import deepcopy
 from typing import Any
 
 import pytest
@@ -92,10 +93,19 @@ def vllm_pvc_inference_service(
     }
 
     accelerator_type = supported_accelerator_type.lower()
-    gpu_count = request.param.get("gpu_count")
+    raw_gpu_count = request.param.get("gpu_count")
+    if raw_gpu_count is None:
+        raise ValueError("gpu_count is required in request.param")
+    try:
+        gpu_count = int(raw_gpu_count)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"gpu_count must be an integer >= 0, got {raw_gpu_count!r}") from exc
+    if gpu_count < 0:
+        raise ValueError(f"gpu_count must be >= 0, got {gpu_count}")
+
     timeout = request.param.get("timeout")
     identifier = ACCELERATOR_IDENTIFIER.get(accelerator_type, Labels.Nvidia.NVIDIA_COM_GPU)
-    resources: Any = PREDICT_RESOURCES["resources"]
+    resources = deepcopy(x=PREDICT_RESOURCES["resources"])
     resources["requests"][identifier] = gpu_count
     resources["limits"][identifier] = gpu_count
     isvc_kwargs["resources"] = resources

@@ -127,23 +127,31 @@ def download_model_data(
     pvc_model_path = f"/mnt/models/{model_path}"
     if restricted_scc_init and use_sub_path:
         init_volume_mount: dict[str, str] = {"mountPath": "/mnt/models/", "name": model_pvc_name}
-        init_args = f"mkdir -p {pvc_model_path}"
+        init_command: list[str] = ["mkdir", "-p", pvc_model_path]
+        init_container_args: list[str] = []
         download_destination = "/mnt/models/"
     elif restricted_scc_init:
         init_volume_mount = volume_mount
-        init_args = f"mkdir -p {pvc_model_path}"
+        init_command = ["mkdir", "-p", pvc_model_path]
+        init_container_args = []
         download_destination = pvc_model_path
     else:
         init_volume_mount = volume_mount
-        init_args = f"mkdir -p {pvc_model_path} && chmod -R 777 {pvc_model_path}"
+        init_command = ["sh"]
+        init_container_args = [
+            "-c",
+            'mkdir -p "$1" && chmod -R 777 "$1"',
+            "init-container",
+            pvc_model_path,
+        ]
         download_destination = pvc_model_path
 
     init_containers = [
         {
             "name": "init-container",
             "image": "quay.io/quay/busybox@sha256:92f3298bf80a1ba949140d77987f5de081f010337880cd771f7e7fc928f8c74d",
-            "command": ["sh"],
-            "args": ["-c", init_args],
+            "command": init_command,
+            "args": init_container_args,
             "volumeMounts": [init_volume_mount],
         }
     ]
@@ -178,7 +186,7 @@ def download_model_data(
         "volumes": volumes,
         "restart_policy": "Never",
     }
-    if (fs_group := namespace_fs_group(client=client, namespace=model_namespace)) and restricted_scc_init:
+    if restricted_scc_init and (fs_group := namespace_fs_group(client=client, namespace=model_namespace)) is not None:
         pod_kwargs["security_context"] = {
             "fsGroup": fs_group,
             "seccompProfile": {"type": "RuntimeDefault"},
