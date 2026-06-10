@@ -23,7 +23,10 @@ class TestVLLMModelCarRaw:
         response_snapshot: Any,
         deployment_config: dict[str, Any],
     ) -> None:
-        """Validate OpenAI inference over the external route for a vLLM model served from an OCI modelcar image."""
+        """Given a vLLM ISVC serving a model from an OCI modelcar image with an exposed external route,
+        When an OpenAI-compatible completion request is sent over the external route,
+        Then the model returns valid inference responses.
+        """
         LOGGER.info("Sending inference request to vLLM model served from OCI image via external route.")
         validate_raw_openai_inference_request(
             isvc=vllm_model_car_inference_service,
