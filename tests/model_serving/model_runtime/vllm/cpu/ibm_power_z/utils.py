@@ -25,7 +25,7 @@ def send_chat_completions_request(
         "max_tokens": max_tokens,
     }
     LOGGER.info("Sending chat completions request", url=url, payload=payload)
-    response = requests.post(url, headers=RestHeader.HEADERS, json=payload, verify=False)
+    response = requests.post(url=url, headers=RestHeader.HEADERS, json=payload, verify=False)
     LOGGER.info("Chat completions response", status_code=response.status_code, body=response.text)
     response.raise_for_status()
     return response.json()
