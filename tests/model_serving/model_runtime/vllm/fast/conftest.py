@@ -12,7 +12,7 @@ from utilities.serving_runtime import ServingRuntimeFromTemplate
 
 
 @pytest.fixture(scope="class")
-def serving_runtime(
+def serving_runtime(  # noqa: UFN001
     request: FixtureRequest,
     admin_client: DynamicClient,
     model_namespace: Namespace,
