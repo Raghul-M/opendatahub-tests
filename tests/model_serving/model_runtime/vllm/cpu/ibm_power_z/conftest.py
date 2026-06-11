@@ -45,6 +45,7 @@ def ibm_power_z_serving_runtime(
     request: FixtureRequest,
     admin_client: DynamicClient,
     model_namespace: Namespace,
+    skip_if_no_supported_ibm_power_z_accelerator_type: None,
     supported_accelerator_type: str,
     vllm_runtime_image: str,
 ) -> Generator[ServingRuntime]:

@@ -5,10 +5,13 @@ import structlog
 from ocp_resources.inference_service import InferenceService
 from tenacity import retry, stop_after_attempt, wait_exponential
 
+from utilities.certificates_utils import get_ca_bundle
 from utilities.inference_utils import get_exposed_isvc_url
 from utilities.plugins.constant import OpenAIEnpoints, RestHeader
 
 LOGGER = structlog.get_logger(name=__name__)
+
+DEFAULT_REQUEST_TIMEOUT: int = 30
 
 
 @retry(stop=stop_after_attempt(5), wait=wait_exponential(min=1, max=6))
@@ -25,8 +28,15 @@ def send_completions_request(
         "max_tokens": max_tokens,
     }
     LOGGER.info("Sending completions request", url=url, payload=payload)
-    response = requests.post(url=url, headers=RestHeader.HEADERS, json=payload, verify=False)
-    LOGGER.info("Completions response", status_code=response.status_code, body=response.text)
+    ca_bundle = get_ca_bundle(client=isvc.client)
+    response = requests.post(
+        url=url,
+        headers=RestHeader.HEADERS,
+        json=payload,
+        verify=ca_bundle or True,
+        timeout=DEFAULT_REQUEST_TIMEOUT,
+    )
+    LOGGER.info("Completions response", status_code=response.status_code, body_length=len(response.text))
     response.raise_for_status()
     return response.json()
 
@@ -45,8 +55,15 @@ def send_chat_completions_request(
         "max_tokens": max_tokens,
     }
     LOGGER.info("Sending chat completions request", url=url, payload=payload)
-    response = requests.post(url=url, headers=RestHeader.HEADERS, json=payload, verify=False)
-    LOGGER.info("Chat completions response", status_code=response.status_code, body=response.text)
+    ca_bundle = get_ca_bundle(client=isvc.client)
+    response = requests.post(
+        url=url,
+        headers=RestHeader.HEADERS,
+        json=payload,
+        verify=ca_bundle or True,
+        timeout=DEFAULT_REQUEST_TIMEOUT,
+    )
+    LOGGER.info("Chat completions response", status_code=response.status_code, body_length=len(response.text))
     response.raise_for_status()
     return response.json()
 

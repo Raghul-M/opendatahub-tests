@@ -40,7 +40,7 @@ pytestmark = pytest.mark.usefixtures("skip_if_no_supported_ibm_power_z_accelerat
                 "runtime_argument": IBM_POWER_Z_SERVING_ARGUMENT,
             },
             IBM_POWER_Z_CHAT_INFERENCE_REQUEST,
-            id="granite-3-1-8b-instruct-raw-cpu",
+            id="test_granite_3_1_8b_instruct_raw_cpu",
         ),
     ],
     indirect=[

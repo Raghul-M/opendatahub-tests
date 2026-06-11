@@ -5,6 +5,7 @@ import structlog
 from ocp_resources.inference_service import InferenceService
 from tenacity import retry, stop_after_attempt, wait_exponential
 
+from utilities.certificates_utils import get_ca_bundle
 from utilities.inference_utils import get_exposed_isvc_url
 from utilities.plugins.constant import OpenAIEnpoints, RestHeader
 
@@ -24,9 +25,21 @@ def send_chat_completions_request(
         "messages": messages,
         "max_tokens": max_tokens,
     }
-    LOGGER.info("Sending chat completions request", url=url, payload=payload)
-    response = requests.post(url=url, headers=RestHeader.HEADERS, json=payload, verify=False)
-    LOGGER.info("Chat completions response", status_code=response.status_code, body=response.text)
+    LOGGER.info(
+        "Sending chat completions request",
+        url=url,
+        model=payload["model"],
+        max_tokens=max_tokens,
+    )
+    ca_bundle = get_ca_bundle(client=isvc.client)
+    response = requests.post(
+        url=url,
+        headers=RestHeader.HEADERS,
+        json=payload,
+        verify=ca_bundle or True,
+        timeout=30,
+    )
+    LOGGER.info("Chat completions response", status_code=response.status_code)
     response.raise_for_status()
     return response.json()
 
