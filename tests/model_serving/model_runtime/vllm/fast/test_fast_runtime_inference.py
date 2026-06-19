@@ -12,7 +12,7 @@ from utilities.inference_utils import get_exposed_isvc_url
 
 LOGGER = structlog.get_logger(name=__name__)
 
-MODEL_PATH: str = "TinyLlama-1.1B-Chat-v1.0"
+MODEL_PATH: str = "granite-7b-starter"
 
 FAST_SERVING_ARGUMENT: list[str] = [
     "--model=/mnt/models",
