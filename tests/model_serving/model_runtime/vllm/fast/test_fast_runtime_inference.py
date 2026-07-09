@@ -20,7 +20,7 @@ FAST_SERVING_ARGUMENT: list[str] = [
 ]
 
 FAST_RAW_DEPLOYMENT_CONFIG: dict[str, Any] = {
-    "deployment_mode": KServeDeploymentType.RAW_DEPLOYMENT,
+    "deployment_mode": KServeDeploymentType.STANDARD,
     "runtime_argument": FAST_SERVING_ARGUMENT,
     "min-replicas": 1,
 }
@@ -50,7 +50,7 @@ def _assert_vllm_version_reported(isvc: InferenceService) -> None:
             {"model-dir": MODEL_PATH},
             {
                 "template_name": RuntimeTemplates.VLLM_FAST_1_CUDA,
-                "deployment_type": KServeDeploymentType.RAW_DEPLOYMENT,
+                "deployment_type": KServeDeploymentType.STANDARD,
             },
             {
                 **FAST_RAW_DEPLOYMENT_CONFIG,
@@ -102,7 +102,7 @@ class TestVllmFast1Inference:
             {"model-dir": MODEL_PATH},
             {
                 "template_name": RuntimeTemplates.VLLM_FAST_2_CUDA,
-                "deployment_type": KServeDeploymentType.RAW_DEPLOYMENT,
+                "deployment_type": KServeDeploymentType.STANDARD,
             },
             {
                 **FAST_RAW_DEPLOYMENT_CONFIG,
